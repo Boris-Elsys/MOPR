@@ -138,6 +138,11 @@ public:
         this->B = -v1.getX();
         this->C = -(A * p1.getX() + B * p1.getY());
     }
+
+    int getA() const { return A; }
+    int getB() const { return B; }
+    int getC() const { return C; }
+
     friend std::ostream& operator<<(std::ostream& os, const Line& l){
         os << l.A << "x + "<< l.B << "y + "<< l.C << " = 0 ";
         return os;
@@ -192,6 +197,7 @@ public:
 
         return Line(p, this->orthogonal());
     }
+
 };
 
 class Ball {
@@ -203,11 +209,13 @@ public:
 
     Ball(const Point& center, double diameter) : center(center), diameter(diameter) {}
     Ball() : center(0, 0), diameter(0) {}
+    Ball(Ball const& other) : center(other.center), diameter(other.diameter) {}
 
     Point getCenter() const { return center; }
     double getDiameter() const { return diameter; }
     double getRadius() const { return diameter / 2.0; }
     void setCenter(const Point& center) { this->center = center; }
+    void setCenter(int x, int y) { this->center = Point(x, y); }
     void setDiameter(double diameter) { this->diameter = diameter; }
 
     friend std::ostream& operator<<(std::ostream& os, const Ball& b) {
@@ -221,6 +229,16 @@ public:
         is >> b.center;
         is >> b.diameter;
         return is;
+    }
+
+    void moveBall(Point point, int power) {
+
+            //Преместваме топката със силата power в посоката на вектора от центъра на топката до точката p
+
+            Vector v(this->getCenter(), point);
+            v.times_num(power);
+            this->setCenter(v.getX() + this->getCenter().getX(), v.getY() + this->getCenter().getY());
+
     }
 
 
@@ -256,10 +274,30 @@ public:
 
 
     bool isInside(const Ball& ball) const{
-        //check if ball with radius is inside of board regardless of rotation
-        if(ball.getCenter().getX() + ball.getRadius() <= p3.getX() && ball.getCenter().getX() - ball.getRadius() >= p1.getX()
-        && ball.getCenter().getY() + ball.getRadius() <= p4.getY() && ball.getCenter().getY() - ball.getRadius() >= p1.getY()){
+        if(ball.getCenter().getX() <= p3.getX() && ball.getCenter().getX() >= p1.getX()
+        && ball.getCenter().getY() <= p3.getY() && ball.getCenter().getY() >= p1.getY()){
             return true;
+        }
+        return false;
+
+    }
+
+    Point getSimmetrical(Ball ball) const{
+
+        int x = ball.getCenter().getX();
+        int y = ball.getCenter().getY();
+
+        if(x < p1.getX()){
+            ball.setCenter(p1.getX() + abs(p1.getX() - x), y);
+
+        }else if(x > p3.getX()){
+            ball.setCenter(p3.getX() - abs(p3.getX() - x), y);
+        }
+
+        if(y < p1.getY()){
+            ball.setCenter(x, p1.getY() + abs(p1.getY() - y));
+        }else if(y > p3.getY()){
+            ball.setCenter(x, p3.getY() - abs(p3.getY() - y));
         }
 
     }
@@ -274,35 +312,15 @@ public:
 
         Board board(p1, p3);
 
-        Line l1(ball.getCenter(), point);
+        Ball tempBall(ball);
+        tempBall.moveBall(point, power);
 
+        while(!board.isInside(tempBall)){
+            tempBall.setCenter(getSimmetrical(tempBall));
 
-        bool bouncing = false;
-        //Ball tempBall((ball.getCenter() + (point - ball.getCenter()) * power), ball.getRadius());
+        }
 
-       /* do {
-
-            if(isInside(tempBall)){
-                ball = tempBall;
-                bouncing = false;
-
-            }else{
-
-                //moving in the direction of the point if the ball is not inside the board
-                //find the point of intersection with the board and move the ball to a point symmetrical to it according to
-                //the side that it hit
-
-
-
-                bouncing = true;
-
-
-            }
-
-
-
-        } while (bouncing); */
-
+        ball = tempBall;
 
     }
 
