@@ -77,16 +77,6 @@ public:
         return vector;
     }
 
-    bool is_colinear(const Vector& other) const {
-
-        //За да бъдат два вектора колинеарни трябва съотношението между x-овете и съотношението между y-ците им да е равно
-        //За избягване на проблеми при деление с нулеви вектори уравнението се умножава на кръст
-        int isColinear = 0;
-        if(this->x * other.y == this->y * other.x){ isColinear++; }
-
-        return isColinear;
-    }
-
     double length() const {
 
         double len = sqrt(pow(this->x, 2) + pow(this->y, 2));
@@ -94,27 +84,6 @@ public:
         return len;
     }
 
-    int dot_product(const Vector& other) const {
-
-        int product = (this->x * other.x) + (this->y * other.y);
-
-        return product;
-    }
-
-    int area(const Vector v1, const Vector v2) {
-
-        //Намира се дължината на двата дадени вектора
-        double a = v1.length();
-        double b = v2.length();
-        //Намира се дължината на третата страна на триъгълника която е равна на дължината на сбора на двата вектора
-        double c = (v1.sum(v2)).length();
-        //Пресмята се полупериметъра на триъгълника
-        double p = (a + b + c) / 2.0;
-        //Имайки полупериметъра и страните на триъгълника чрез хероновата формула се пресмята лицето на триъгълника
-        double S = sqrt(p * (p - a) * (p - b) * (p - c));
-
-        return S;
-    }
 };
 
 class Line {
@@ -128,9 +97,11 @@ public:
         this->B = -v.getX();
         this->C = -(A * p.getX() + B * p.getY());
     }
+
     Line(const Point p1, const Point p2) {
 
-        //Чрез дадените 2 точки инстанцирам вектор като с него и първата ми дадена точка мога да и използвам метода за конструиране на права имплементиран горе
+        //Чрез дадените 2 точки инстанцирам вектор като с него и първата ми дадена точка мога да и използвам метод
+        // за конструиране на права имплементиран горе
 
         Vector v1(p1, p2);
 
@@ -138,10 +109,6 @@ public:
         this->B = -v1.getX();
         this->C = -(A * p1.getX() + B * p1.getY());
     }
-
-    int getA() const { return A; }
-    int getB() const { return B; }
-    int getC() const { return C; }
 
     friend std::ostream& operator<<(std::ostream& os, const Line& l){
         os << l.A << "x + "<< l.B << "y + "<< l.C << " = 0 ";
@@ -164,38 +131,6 @@ public:
         if(this->A * other.B == this->B * other.A){ areParallel++; }
 
         return areParallel;
-    }
-
-    bool is_orthogonal(const Line& other) const {
-
-        //За да бъдат две прави ортогонални трябва те да са перпендикулярни в точката на пресичане
-        //От формулата ((A1 / B1) * (A2 / B2) + 1) / (A2 / B2) - (A1 / B1) = 0 извеждаме (А1 / В1) * (A2 / B2) = -1
-        //А него представяме като A1 / B1 = -(B2 / A2) което след умножение на кръст става A1 * B1 + B2 * A2 = 0
-
-        int isOrthogonal = 0;
-        if(((this->A * other.A) + (this->B * other.B)) == 0){ isOrthogonal++; }
-
-        return isOrthogonal;
-    }
-
-    Vector colinear() const {
-
-        return Vector(-(this->B), this->A);
-    }
-
-    Vector orthogonal() const {
-
-        return Vector(this->A, this->B);
-    }
-
-    Line parallel(const Point p) const {
-
-        return Line(p, this->colinear());
-    }
-
-    Line orthogonal(const Point p) const {
-
-        return Line(p, this->orthogonal());
     }
 
 };
